@@ -4,7 +4,7 @@ pipeline {
     stages {
         stage('Clone Repository') {
             steps {
-                git 'https://github.com/your-repo.git'
+                git 'https://github.com/muhammadwaqas964/devsecops-nodejs-app.git'
             }
         }
 
@@ -39,3 +39,4 @@ pipeline {
         }
     }
 }
+
