@@ -1,32 +1,40 @@
 pipeline {
     agent any
 
-    environment {
-        DOCKER_CREDENTIALS = credentials('dockerhub-credentials')  // Use your DockerHub credentials
-        AWS_CREDENTIALS = credentials('aws-credentials')            // Use your AWS credentials
-        KUBE_CONFIG = credentials('kube-config')                    // If needed for kubectl commands
-    }
-
     stages {
-        stage('Checkout') {
+        stage('Clone Repository') {
             steps {
-                git branch: 'main', url: 'git@github.com:muhammadwaqas964/devsecops-nodejs-app.git'
+                script {
+                    // Clone the repository using a proper credential ID (adjust as necessary)
+                    git credentialsId: 'github-credentials', url: 'https://github.com/your-repo.git'
+                }
             }
         }
 
         stage('Build Docker Image') {
             steps {
                 script {
-                    sh 'docker build -t my-nodejs-app .'
+                    // Build Docker image
+                    docker.build("devsecops-nodejs-app:${env.BUILD_ID}")
                 }
             }
         }
 
-        stage('Push to DockerHub') {
+        stage('Security Scan') {
             steps {
                 script {
-                    docker.withRegistry('https://index.docker.io/v1/', DOCKER_CREDENTIALS) {
-                        sh 'docker push muhammadwaqas366/my-nodejs-app'
+                    // Run Trivy to scan the image for vulnerabilities
+                    sh 'docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy:latest image devsecops-nodejs-app:${env.BUILD_ID}'
+                }
+            }
+        }
+
+        stage('Push Image to DockerHub') {
+            steps {
+                script {
+                    // Push the image to Docker Hub using configured credentials
+                    docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-credentials') {
+                        docker.image("devsecops-nodejs-app:${env.BUILD_ID}").push()
                     }
                 }
             }
@@ -35,7 +43,8 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 script {
-                    sh 'kubectl apply -f deployment.yaml'
+                    // Deploy the image to Kubernetes using the kubeconfig
+                    kubernetesDeploy(kubeconfigId: 'kubeconfig', configs: 'k8s/deployment.yaml', enableConfigSubstitution: true)
                 }
             }
         }
@@ -43,8 +52,8 @@ pipeline {
 
     post {
         always {
-            echo 'Cleaning up Docker images...'
-            sh 'docker rmi my-nodejs-app || true'
+            // Clean up any Docker images after the pipeline run
+            cleanWs()
         }
     }
 }
