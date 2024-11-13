@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: devsecops-nodejs-app
+  labels:
+    app: devsecops-nodejs-app
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: devsecops-nodejs-app
+  template:
+    metadata:
+      labels:
+        app: devsecops-nodejs-app
+    spec:
+      containers:
+      - name: devsecops-nodejs-container
+        image: your-dockerhub-username/devsecops-nodejs-app:latest
+        ports:
+        - containerPort: 3000
+        env:
+        - name: SECRET_MESSAGE
+          valueFrom:
+            secretKeyRef:
+              name: app-secret
+              key: secret-message
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: devsecops-nodejs-service
+spec:
+  selector:
+    app: devsecops-nodejs-app
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 3000
+  type: LoadBalancer
+
