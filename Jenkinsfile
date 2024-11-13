@@ -1,32 +1,32 @@
 pipeline {
     agent any
 
+    environment {
+        DOCKER_CREDENTIALS = credentials('dockerhub-credentials')  // Use your DockerHub credentials
+        AWS_CREDENTIALS = credentials('aws-credentials')            // Use your AWS credentials
+        KUBE_CONFIG = credentials('kube-config')                    // If needed for kubectl commands
+    }
+
     stages {
-        stage('Clone Repository') {
+        stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/muhammadwaqas964/devsecops-nodejs-app.git'
+                git branch: 'main', url: 'git@github.com:muhammadwaqas964/devsecops-nodejs-app.git'
             }
         }
 
         stage('Build Docker Image') {
             steps {
                 script {
-                    docker.build("devsecops-nodejs-app:${env.BUILD_ID}")
+                    sh 'docker build -t my-nodejs-app .'
                 }
             }
         }
 
-        stage('Security Scan') {
-            steps {
-                sh 'docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy:latest image devsecops-nodejs-app:${env.BUILD_ID}'
-            }
-        }
-
-        stage('Push Image to DockerHub') {
+        stage('Push to DockerHub') {
             steps {
                 script {
-                    docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-credentials') {
-                        docker.image("devsecops-nodejs-app:${env.BUILD_ID}").push()
+                    docker.withRegistry('https://index.docker.io/v1/', DOCKER_CREDENTIALS) {
+                        sh 'docker push muhammadwaqas366/my-nodejs-app'
                     }
                 }
             }
@@ -34,8 +34,17 @@ pipeline {
 
         stage('Deploy to Kubernetes') {
             steps {
-                kubernetesDeploy(kubeconfigId: 'kubeconfig', configs: 'k8s/deployment.yaml', enableConfigSubstitution: true)
+                script {
+                    sh 'kubectl apply -f deployment.yaml'
+                }
             }
+        }
+    }
+
+    post {
+        always {
+            echo 'Cleaning up Docker images...'
+            sh 'docker rmi my-nodejs-app || true'
         }
     }
 }
