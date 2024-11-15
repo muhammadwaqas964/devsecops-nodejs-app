@@ -27,8 +27,7 @@ pipeline {
             steps {
                 script {
                     docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-credentials') {
-                        docker.image("devsecops-nodejs-app:${env.BUILD_ID}").push()
-                    }
+                        docker.image("devsecops-nodejs-app:${env.BUILD_ID}").push()                   }
                 }
             }
         }

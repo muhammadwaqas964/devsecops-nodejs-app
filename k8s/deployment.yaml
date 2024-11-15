@@ -5,7 +5,7 @@ metadata:
   labels:
     app: devsecops-nodejs-app
 spec:
-  replicas: 3
+  replicas: 3  # We will run 3 instances (pods) of our app
   selector:
     matchLabels:
       app: devsecops-nodejs-app
@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: devsecops-nodejs-container
-        image: your-dockerhub-username/devsecops-nodejs-app:latest
+        image: your-dockerhub-username/devsecops-nodejs-app:latest  # Use your DockerHub repo
         ports:
         - containerPort: 3000
         env:
@@ -24,7 +24,7 @@ spec:
           valueFrom:
             secretKeyRef:
               name: app-secret
-              key: secret-message
+              key: secret-message  # Will get secret value from Vault through Kubernetes Secrets
 ---
 apiVersion: v1
 kind: Service
@@ -35,7 +35,7 @@ spec:
     app: devsecops-nodejs-app
   ports:
   - protocol: TCP
-    port: 80
-    targetPort: 3000
-  type: LoadBalancer
+    port: 80  # Expose the service on port 80
+    targetPort: 3000  # Internally forward traffic to container port 3000
+  type: LoadBalancer  # Exposes the app to the internet
 
