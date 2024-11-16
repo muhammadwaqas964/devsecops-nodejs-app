@@ -5,7 +5,7 @@ metadata:
   labels:
     app: devsecops-nodejs-app
 spec:
-  replicas: 3  # We will run 3 instances (pods) of our app
+  replicas: 3
   selector:
     matchLabels:
       app: devsecops-nodejs-app
@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: devsecops-nodejs-container
-        image: your-dockerhub-username/devsecops-nodejs-app:latest  # Use your DockerHub repo
+        image: muhammadwaqas366/devsecops-nodejs-app:latest  # Updated with your DockerHub username
         ports:
         - containerPort: 3000
         env:
@@ -24,7 +24,9 @@ spec:
           valueFrom:
             secretKeyRef:
               name: app-secret
-              key: secret-message  # Will get secret value from Vault through Kubernetes Secrets
+              key: secret-message
+      imagePullSecrets:
+      - name: regcred  # Referencing the image pull secret
 ---
 apiVersion: v1
 kind: Service
