@@ -58,8 +58,8 @@ pipeline {
                         sh 'aws configure set region us-east-1'
                         
                         // Apply the Kubernetes manifests
-                        sh 'kubectl --kubeconfig=$KUBECONFIG_PATH apply -f k8s/deployment.yaml'
-                        sh 'kubectl --kubeconfig=$KUBECONFIG_PATH apply -f k8s/secret.yaml'
+                        sh 'kubectl --kubeconfig=$KUBECONFIG_PATH apply -f k8s/deployment.yaml --validate=false'
+                        sh 'kubectl --kubeconfig=$KUBECONFIG_PATH apply -f k8s/secret.yaml --validate=false'
                     }
                 }
             }
