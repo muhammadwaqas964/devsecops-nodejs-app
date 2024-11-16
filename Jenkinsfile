@@ -7,7 +7,7 @@ pipeline {
         DOCKER_CREDENTIALS = "dockerhub-credentials"
         GITHUB_CREDENTIALS = "Github_AWS_PEOJECT"
         K8S_NAMESPACE = "default"
-        KUBECONFIG_PATH = "/home/jenkins/.kube/config"
+        KUBECONFIG_PATH = "/root/.kube/config"
     }
 
     stages {
