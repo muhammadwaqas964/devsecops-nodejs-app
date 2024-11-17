@@ -6,7 +6,7 @@ pipeline {
         DOCKER_IMAGE_TAG = "latest"
         DOCKER_CREDENTIALS = "dockerhub-credentials"
         GITHUB_CREDENTIALS = "Github_AWS_PEOJECT"
-        K8S_NAMESPACE = "default"
+        K8S_NAMESPACE = "my-secure-namespace"  // Updated namespace
         KUBECONFIG_PATH = "/home/jenkins/.kube/config"
     }
 
@@ -56,10 +56,10 @@ pipeline {
                         sh 'aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID'
                         sh 'aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY'
                         sh 'aws configure set region us-east-1'
-                        
-                        // Apply the Kubernetes manifests
-                        sh 'kubectl --kubeconfig=$KUBECONFIG_PATH apply -f k8s/deployment.yaml'
-                        sh 'kubectl --kubeconfig=$KUBECONFIG_PATH apply -f k8s/secret.yaml'
+
+                        // Apply the Kubernetes manifests to the specified namespace
+                        sh 'kubectl --kubeconfig=$KUBECONFIG_PATH apply -f k8s/deployment.yaml -n $K8S_NAMESPACE'
+                        sh 'kubectl --kubeconfig=$KUBECONFIG_PATH apply -f k8s/secret.yaml -n $K8S_NAMESPACE'
                     }
                 }
             }
