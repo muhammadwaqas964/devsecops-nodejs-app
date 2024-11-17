@@ -1,0 +1,17 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-only-internal-traffic
+  namespace: my-secure-namespace
+spec:
+  podSelector:
+    matchLabels:
+      app: devsecops-nodejs-app
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: internal-service
+
